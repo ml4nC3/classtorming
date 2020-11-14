@@ -2,6 +2,6 @@ venv
 .idea
 /api/classtorming-api.log
 /classtorming-API-Ecrans.png
-/attendee/node_modules/
-/attendee/.gitignore
-/attendee/.idea/
+/attend/node_modules/
+/attend/.gitignore
+/attend/.idea/

@@ -1,7 +1,9 @@
 from typing import Optional
 from fastapi import FastAPI
-from random import randint
+from models import attendee
+from session import Session
 import logging
+
 
 logging.basicConfig(filename='classtorming-api.log',
                     level=logging.DEBUG,
@@ -10,8 +12,10 @@ logging.basicConfig(filename='classtorming-api.log',
 app = FastAPI()
 
 sessions = dict()
+
 activities = {"sondage": 1234,
               "tableau": 74938}
+
 
 @app.get("/")
 def read_root():
@@ -30,12 +34,15 @@ def read_item(item_id: str, q: Optional[str] = None):
 def create_session():
     new_session = Session()
     sessions[new_session.session_id] = new_session
-    logging.info(f"Creating new session with session_id={self.session_id}")
+    logging.info(f"Creating new session with session_id={new_session.session_id}")
     return new_session.session_id
 
-# Connect to session from attendee app
-@app.get("/connect/session")
-def connect_session():
+
+# Connect to session from attend app
+@app.post("/{session_id}/connect")
+async def connect_session(session_id: str, newcomer: attendee.Attendee):
+    sessions[session_id].add_attendee(newcomer)
+    return newcomer.name
 
 
 @app.get("/{session_id}/startactivity/{activity_type}")
@@ -45,14 +52,7 @@ def create_activity(session_id: str, activity_type: str):
     return True
 
 
-class Session:
-    """Session class handles the ability to interact with storming sessions, activities, attendees..."""
-    def __init__(self):
-        self.session_id = str()
-        for num in range(6):
-            self.session_id += str(randint(0, 9))
-
-    def add_activity(self, activity_type):
-        logging.info(f"Creating new activity {activity_type} in session_id={self.session_id}")
-        return True
+@app.get("/{session_id}/attendees")
+def get_attendee_list(session_id: str):
+    return sessions[session_id]
 
